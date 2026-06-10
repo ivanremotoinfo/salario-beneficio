@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salário de Benefício | SuporteADV</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0d0d0d; color: #e0e0e0; padding: 24px 16px; }
+  .container { max-width: 760px; margin: 0 auto; }
+
+  .header { text-align: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #222; }
+  h1 { font-size: 1.5rem; color: #008080; margin-bottom: 6px; }
+  .subtitle { font-size: 0.88rem; color: #888; line-height: 1.5; }
+  .brand { font-size: 0.78rem; margin-top: 8px; color: #555; }
+  .brand span.s { color: #8B00FF; font-weight: 700; }
+  .brand span.a { color: #008080; font-weight: 700; }
+
+  .card { background: #111; border-radius: 10px; border: 1px solid #222; border-left: 3px solid #8B00FF; padding: 20px 22px; margin-bottom: 14px; }
+  .card-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #008080; font-weight: 700; margin-bottom: 16px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
+  .field.full { grid-column: 1 / -1; }
+  .field label { display: block; font-size: 0.78rem; color: #888; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .field input, .field select {
+    width: 100%; padding: 9px 11px; border: 1.5px solid #333; border-radius: 6px;
+    font-size: 0.95rem; color: #fff; background: #1a1a1a; transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: #008080; box-shadow: 0 0 0 2px rgba(0,128,128,0.2); }
+  .field select option { background: #1a1a1a; }
+
+  .info-box { background: #0d1a1a; border: 1px solid #1a3a3a; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; font-size: 0.82rem; color: #666; line-height: 1.6; }
+  .info-box b { color: #008080; }
+
+  /* Salários */
+  .sal-row { display: grid; grid-template-columns: auto auto 1fr 1fr 36px; gap: 8px; align-items: end; margin-bottom: 8px; }
+  @media (max-width: 560px) { .sal-row { grid-template-columns: auto 1fr 1fr 36px; } }
+  .num-badge { width: 28px; height: 36px; background: #1a1a1a; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: #555; font-weight: 700; flex-shrink: 0; }
+  .ano-badge { height: 36px; background: #1a1a1a; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: #008080; font-weight: 700; padding: 0 10px; flex-shrink: 0; }
+  .btn-add { background: transparent; color: #008080; border: 1.5px dashed #008080; padding: 7px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-bottom: 14px; width: 100%; }
+  .btn-add:hover { background: #0a1a1a; }
+  .btn-rem { background: #1a0a0a; border: 1px solid #3a1a1a; color: #ff4444; width: 36px; height: 36px; border-radius: 6px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  button.calcular { background: #008080; color: #fff; border: none; padding: 10px 26px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.07em; cursor: pointer; transition: background 0.18s; text-transform: uppercase; margin-right: 10px; }
+  button.calcular:hover { background: #006666; box-shadow: 0 0 10px rgba(0,128,128,0.4); }
+  button.limpar { background: transparent; color: #555; border: 1.5px solid #333; padding: 10px 18px; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+
+  /* Resultado */
+  .resultado { background: #0a1a0a; border: 1px solid #1a4a1a; border-radius: 10px; padding: 20px 22px; margin-top: 14px; display: none; }
+  .resultado.visible { display: block; }
+  .resultado-titulo { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #008080; font-weight: 700; margin-bottom: 16px; }
+
+  .res-principal { text-align: center; margin-bottom: 20px; }
+  .res-principal label { display: block; font-size: 0.72rem; color: #555; text-transform: uppercase; margin-bottom: 6px; }
+  .res-principal .v { font-size: 1.8rem; font-weight: 700; color: #00ff00; font-family: 'Courier New', monospace; }
+  .res-principal .sub { font-size: 0.82rem; color: #555; margin-top: 4px; }
+
+  /* Cards benefícios */
+  .benef-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+  @media (max-width: 520px) { .benef-grid { grid-template-columns: 1fr; } }
+  .benef-card { background: #111; border-radius: 8px; border: 1px solid #1a1a1a; padding: 14px; text-align: center; }
+  .benef-card .bc-tipo { font-size: 0.68rem; text-transform: uppercase; color: #555; font-weight: 700; margin-bottom: 6px; }
+  .benef-card .bc-coef { font-size: 0.78rem; color: #444; margin-bottom: 4px; }
+  .benef-card .bc-valor { font-size: 1.05rem; font-weight: 700; color: #008080; font-family: 'Courier New', monospace; }
+
+  .res-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 520px) { .res-grid { grid-template-columns: 1fr 1fr; } }
+  .res-item label { display: block; font-size: 0.72rem; color: #555; text-transform: uppercase; margin-bottom: 4px; }
+  .res-item .valor { font-size: 1rem; font-weight: 700; color: #ccc; font-family: 'Courier New', monospace; }
+  .res-item .valor.teal { color: #008080; }
+  .res-item .valor.sec { color: #555; font-size: 0.9rem; }
+
+  .divider { border: none; border-top: 1px solid #1a3a1a; margin: 14px 0; }
+
+  /* Tabela salários */
+  .tabela-wrap { overflow-x: auto; margin-top: 14px; }
+  .tabela-wrap summary { cursor: pointer; color: #008080; font-size: 0.82rem; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 480px; }
+  th { text-align: left; color: #555; padding: 6px 8px; border-bottom: 1px solid #222; font-size: 0.72rem; text-transform: uppercase; }
+  td { color: #999; padding: 6px 8px; border-bottom: 1px solid #1a1a1a; }
+  tr:hover td { background: #151515; }
+  td.dest { color: #00ff00; font-weight: 700; font-family: 'Courier New', monospace; }
+  td.excluido { color: #333; text-decoration: line-through; }
+  tr.total-row td { color: #fff; font-weight: 700; background: #0d1a0d; border-top: 1px solid #333; }
+
+  .erro { background: #1a0a0a; border: 1px solid #4a1a1a; border-radius: 8px; padding: 14px 16px; color: #ff6666; font-size: 0.88rem; margin-top: 14px; display: none; }
+  .erro.visible { display: block; }
+  .aviso { font-size: 0.72rem; color: #444; margin-top: 12px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Salário de Benefício</h1>
+    <p class="subtitle">Calcule o salário de benefício previdenciário (média dos salários de contribuição) e estime a renda mensal inicial por tipo de benefício.</p>
+    <p class="brand"><span class="s">suporte</span><span class="a">ADV</span>.br — Ferramentas para Advogados</p>
+  </div>
+
+  <div class="card">
+    <div class="info-box">
+      <b>O que é o Salário de Benefício (SB)?</b> É a média aritmética de todos os salários de contribuição desde julho/1994 (ou desde o início das contribuições, se posterior). Após a EC 103/2019, o benefício = SB × coeficiente (60% + 2% por ano acima do mínimo para aposentadoria programada).
+    </div>
+
+    <div class="card-label">Parâmetros</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Tipo de benefício</label>
+        <select id="tipoBenef">
+          <option value="apos_prog">Aposentadoria Programada (EC 103/2019)</option>
+          <option value="apos_idade">Aposentadoria por Idade</option>
+          <option value="invalidade">Aposentadoria por Invalidez / Incapacidade</option>
+          <option value="auxilio">Auxílio por Incapacidade Temporária</option>
+          <option value="pensao">Pensão por Morte</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Sexo</label>
+        <select id="sexo">
+          <option value="M">Masculino</option>
+          <option value="F">Feminino</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tempo de contribuição (anos)</label>
+        <input type="number" id="tempoContrib" placeholder="Ex: 35" step="0.5" min="0" max="50">
+      </div>
+      <div class="field">
+        <label>Método de cálculo</label>
+        <select id="metodo">
+          <option value="todos">Média de todos os salários (pós EC 103)</option>
+          <option value="80pct">80% melhores salários (regras de transição)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card-label">Salários de Contribuição</div>
+    <div class="info-box">
+      Informe os salários de contribuição mensais (já corrigidos monetariamente ou em valores nominais). O sistema calculará a média.
+    </div>
+    <div id="salarios-container"></div>
+    <button class="btn-add" onclick="addSalario()">+ Adicionar salário</button>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="calcular" onclick="calcular()">CALCULAR</button>
+      <button class="limpar" onclick="limpar()">LIMPAR</button>
+    </div>
+  </div>
+
+  <div class="erro" id="erro"></div>
+
+  <div class="resultado" id="resultado">
+    <div class="resultado-titulo" id="res-titulo">Salário de Benefício</div>
+
+    <div class="res-principal">
+      <label>💰 Salário de benefício (média)</label>
+      <div class="v" id="res-sb">—</div>
+      <div class="sub" id="res-sub">—</div>
+    </div>
+
+    <div class="resultado-titulo">Benefício Estimado por Modalidade</div>
+    <div class="benef-grid" id="benef-grid"></div>
+
+    <div class="res-grid">
+      <div class="res-item"><label>Total de competências</label><div class="valor teal" id="res-total-comp">—</div></div>
+      <div class="res-item"><label>Competências usadas</label><div class="valor" id="res-comp-usadas">—</div></div>
+      <div class="res-item"><label>Teto INSS</label><div class="valor sec">R$ 7.786,02</div></div>
+    </div>
+
+    <hr class="divider">
+
+    <details class="tabela-wrap">
+      <summary>Ver todos os salários informados</summary>
+      <table>
+        <thead><tr><th>#</th><th>Período</th><th>Salário</th><th>Status</th></tr></thead>
+        <tbody id="tabela-sal"></tbody>
+      </table>
+    </details>
+
+    <p class="aviso">⚠️ O cálculo real considera a atualização dos salários pelo INPC até a data do benefício. Para a "Revisão da Vida Toda" (Tema 1.102 STF), podem ser incluídos salários anteriores a julho/1994 se mais favoráveis. Consulte um advogado previdencialista para o cálculo exato com dados do CNIS.</p>
+  </div>
+
+</div>
+
+<script>
+const SM = 1518;
+const TETO = 7786.02;
+let numSal = 0;
+
+function addSalario(periodo='', valor='') {
+  numSal++;
+  const id = numSal;
+  const ano = periodo || new Date().getFullYear();
+  const div = document.createElement('div');
+  div.className = 'sal-row';
+  div.id = `sal-${id}`;
+  div.innerHTML = `
+    <div class="num-badge">${id}</div>
+    <div class="field"><label>Período</label>
+      <input type="text" id="sPer-${id}" placeholder="Ex: 01/2024" value="${periodo}" style="max-width:100px">
+    </div>
+    <div class="field"><label>Salário de contribuição (R$)</label>
+      <input type="number" id="sVal-${id}" placeholder="0,00" step="0.01" min="0" value="${valor}">
+    </div>
+    <div class="field"><label>Obs (opcional)</label>
+      <input type="text" id="sObs-${id}" placeholder="Ex: empresa X">
+    </div>
+    <button class="btn-rem" onclick="remSalario(${id})">✕</button>`;
+  document.getElementById('salarios-container').appendChild(div);
+}
+
+function remSalario(id) {
+  const el = document.getElementById(`sal-${id}`);
+  if (el) el.remove();
+}
+
+function limpar() {
+  document.getElementById('salarios-container').innerHTML = '';
+  numSal = 0;
+  for (let i = 0; i < 5; i++) addSalario();
+  document.getElementById('resultado').classList.remove('visible');
+  hideErro();
+}
+
+function fmtMoeda(v) { return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+
+function showErro(msg) {
+  document.getElementById('erro').textContent = msg;
+  document.getElementById('erro').classList.add('visible');
+  document.getElementById('resultado').classList.remove('visible');
+}
+function hideErro() { document.getElementById('erro').classList.remove('visible'); }
+
+function calcular() {
+  hideErro();
+  const tipoBenef = document.getElementById('tipoBenef').value;
+  const sexo = document.getElementById('sexo').value;
+  const tempoContrib = parseFloat(document.getElementById('tempoContrib').value) || 0;
+  const metodo = document.getElementById('metodo').value;
+
+  // Coleta salários
+  const salarios = [];
+  document.querySelectorAll('[id^="sal-"]').forEach(el => {
+    const id = el.id.replace('sal-','');
+    const per = document.getElementById(`sPer-${id}`)?.value || '';
+    const val = parseFloat(document.getElementById(`sVal-${id}`)?.value) || 0;
+    const obs = document.getElementById(`sObs-${id}`)?.value || '';
+    if (val > 0) salarios.push({ per, val: Math.min(val, TETO), valOrig: val, obs });
+  });
+
+  if (salarios.length === 0) return showErro('Adicione ao menos um salário de contribuição.');
+
+  // Ordenar do maior para menor
+  const ordenados = [...salarios].sort((a,b) => b.val - a.val);
+
+  // Define quantas competências usar
+  let usadas;
+  if (metodo === '80pct') {
+    usadas = Math.ceil(salarios.length * 0.8);
+  } else {
+    usadas = salarios.length;
+  }
+
+  const salariosUsados = ordenados.slice(0, usadas);
+  const mediasSB = salariosUsados.reduce((s,x) => s+x.val, 0) / usadas;
+  const sb = Math.min(mediasSB, TETO);
+
+  // Coeficientes por tipo
+  const tempoMinProg = sexo === 'M' ? 35 : 30;
+  const excedente = Math.max(0, tempoContrib - tempoMinProg);
+  const coefProg = Math.min(100, 60 + excedente * 2);
+  const coefIdade = 60; // simplificado
+  const coefInvalid = 100;
+  const coefAuxilio = 91; // 91% após 15 dias
+  const coefPensao = 50; // cota familiar básica + individuais
+
+  // Benefícios
+  const beneficios = [
+    { tipo:'Aposentadoria Programada', coef:coefProg, valor:Math.max(SM, sb * coefProg/100) },
+    { tipo:'Aposentadoria por Idade', coef:coefIdade, valor:Math.max(SM, sb * coefIdade/100) },
+    { tipo:'Inval./Incapacidade Total', coef:coefInvalid, valor:Math.max(SM, sb * coefInvalid/100) },
+    { tipo:'Aux. Incapacidade Temp.', coef:coefAuxilio, valor:Math.max(SM, sb * coefAuxilio/100) },
+    { tipo:'Pensão por Morte', coef:coefPensao, valor:Math.max(SM, sb * coefPensao/100) },
+  ];
+
+  const nomesTipos = {
+    apos_prog:'Aposentadoria Programada', apos_idade:'Aposentadoria por Idade',
+    invalidade:'Invalidez/Incapacidade', auxilio:'Aux. Incapacidade', pensao:'Pensão por Morte'
+  };
+
+  document.getElementById('res-titulo').textContent = `Salário de Benefício — ${nomesTipos[tipoBenef]}`;
+  document.getElementById('res-sb').textContent = fmtMoeda(sb);
+  document.getElementById('res-sub').textContent = `${usadas} competências usadas | Método: ${metodo==='80pct'?'80% melhores':'todos os salários'} | Coeficiente: ${coefProg}%`;
+  document.getElementById('res-total-comp').textContent = salarios.length + ' competências';
+  document.getElementById('res-comp-usadas').textContent = usadas + ' competências';
+
+  // Cards
+  const grid = document.getElementById('benef-grid');
+  grid.innerHTML = '';
+  beneficios.forEach(b => {
+    const card = document.createElement('div');
+    card.className = 'benef-card';
+    card.innerHTML = `
+      <div class="bc-tipo">${b.tipo}</div>
+      <div class="bc-coef">Coeficiente: ${b.coef}%</div>
+      <div class="bc-valor">${fmtMoeda(b.valor)}</div>`;
+    grid.appendChild(card);
+  });
+
+  // Tabela salários
+  const tbody = document.getElementById('tabela-sal');
+  tbody.innerHTML = '';
+  const usadosSet = new Set(salariosUsados.map(s => s.per + s.val));
+  salarios.forEach((s, i) => {
+    const eUsado = metodo === 'todos' || usadosSet.has(s.per + s.val);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td class="${eUsado?'':'excluido'}">${s.per || '—'}</td>
+      <td class="${eUsado?'dest':'excluido'}">${fmtMoeda(s.val)}</td>
+      <td style="color:${eUsado?'#00ff00':'#555'};font-size:0.78rem">${eUsado?'✓ Incluído':'Excluído (20% menores)'}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const trT = document.createElement('tr');
+  trT.className = 'total-row';
+  trT.innerHTML = `<td colspan="2">Média (${usadas} comp.)</td><td class="dest">${fmtMoeda(sb)}</td><td style="color:#008080">Salário de Benefício</td>`;
+  tbody.appendChild(trT);
+
+  document.getElementById('resultado').classList.add('visible');
+}
+
+// Init — 12 meses de exemplo
+const hoje = new Date();
+for (let i = 11; i >= 0; i--) {
+  const d = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+  const per = `${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  addSalario(per, (3000 + Math.floor(Math.random()*1000)).toFixed(2));
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { const f = document.activeElement; if (f && (f.tagName==='INPUT'||f.tagName==='SELECT')) calcular(); }
+});
+</script>
+</body>
+</html>
